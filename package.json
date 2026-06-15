@@ -1,0 +1,52 @@
+{
+    "name": "cucumber-fixture",
+    "version": "0.1.0",
+    "license": "MIT",
+    "author": "Lennart Gerken",
+    "description": "cucumber-fixture is a fixture structure for cucumber step definitions.",
+    "keywords": [
+        "cucumber",
+        "bdd",
+        "test",
+        "testautomation",
+        "fixtures"
+    ],
+    "type": "module",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "require": "./dist/index.cjs"
+        }
+    },
+    "module": "./dist/index.js",
+    "main": "./dist/index.cjs",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "pretty": "prettier . --write",
+        "pretty:check": "prettier . --check",
+        "lint": "eslint .",
+        "type-check": "tsc -p tsconfig.json --noEmit",
+        "type-check:tests": "tsc -p tests/tsconfig.json --noEmit",
+        "build": "rollup -c",
+        "test": "vitest run"
+    },
+    "devDependencies": {
+        "@cucumber/cucumber": "^13.0.0",
+        "@eslint/js": "^10.0.1",
+        "@rollup/plugin-typescript": "^12.3.0",
+        "@types/node": "^25.9.3",
+        "eslint": "^10.4.1",
+        "prettier": "^3.8.4",
+        "pseudo-fixture": "^1.3.0",
+        "rollup": "^4.61.1",
+        "tslib": "^2.8.1",
+        "tsx": "^4.22.4",
+        "typescript": "^6.0.3",
+        "typescript-eslint": "^8.60.1",
+        "vitest": "^4.1.8"
+    }
+}
