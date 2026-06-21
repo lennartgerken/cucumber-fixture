@@ -11,7 +11,7 @@ import {
 let setupCount = 0
 let expectedData1: string
 
-const { Before, After, Given, When, Then } = createKeywords<{
+const { BeforeAll, AfterAll, Before, After, Given } = createKeywords<{
     data1: string
     data2: void
 }>(baseBeforeAll, baseAfterAll, baseBefore, baseAfter, defineStep, {
@@ -22,7 +22,8 @@ const { Before, After, Given, When, Then } = createKeywords<{
             expectedData1 = crypto.randomUUID()
             return expectedData1
         },
-        teardown: ({ data1 }) => expect(data1).toBe(expectedData1)
+        teardown: ({ data1 }) => expect(data1).toBe(expectedData1),
+        global: true
     },
     data2: {
         setup: ({ data1 }) => expect(data1).toBe(expectedData1),
@@ -30,12 +31,12 @@ const { Before, After, Given, When, Then } = createKeywords<{
     }
 })
 
+BeforeAll(({ data1 }) => expect(data1).toBe(expectedData1))
+
+AfterAll(({ data1 }) => expect(data1).toBe(expectedData1))
+
 Before(({ data1 }) => expect(data1).toBe(expectedData1))
 
 After(({ data1 }) => expect(data1).toBe(expectedData1))
 
 Given('some GIVEN step', ({ data1 }) => expect(data1).toBe(expectedData1))
-
-When('some WHEN step', ({ data1 }) => expect(data1).toBe(expectedData1))
-
-Then('some THEN step', ({ data1 }) => expect(data1).toBe(expectedData1))

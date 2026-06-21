@@ -1,6 +1,8 @@
 import { expect } from 'vitest'
 import { createKeywords } from '../../../dist'
 import {
+    BeforeAll as baseBeforeAll,
+    AfterAll as baseAfterAll,
     Before as baseBefore,
     After as baseAfter,
     defineStep,
@@ -11,7 +13,7 @@ let expectedData1: string
 
 const { Given, When } = createKeywords<{
     data1: string
-}>(baseBefore, baseAfter, defineStep, {
+}>(baseBeforeAll, baseAfterAll, baseBefore, baseAfter, defineStep, {
     data1: () => {
         expectedData1 = crypto.randomUUID()
         return expectedData1
