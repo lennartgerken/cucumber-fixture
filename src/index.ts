@@ -1,9 +1,11 @@
 import type {
+    BeforeAll as OriginalBeforeAll,
     Before as OriginalBefore,
     defineStep as OriginalStep
 } from '@cucumber/cucumber'
-import { PseudoFixture } from 'pseudo-fixture'
+import { PseudoFixture, Definitions } from 'pseudo-fixture'
 
+type BaseGlobalHook = typeof OriginalBeforeAll
 type BaseHook = typeof OriginalBefore
 type BaseStep = typeof OriginalStep
 
@@ -16,6 +18,8 @@ type HookCode<F> = (
     fixtures: F,
     options: Parameters<Parameters<BaseHook>[1]>[0]
 ) => Promise<void> | void
+
+type GlobalHookCode<F> = (fixtures: F) => Promise<void> | void
 
 type Step<F> = {
     <A extends unknown[]>(
@@ -31,20 +35,30 @@ type Hook<F> = {
     (code: HookCode<F>): void
 }
 
+type GlobalHook<F> = {
+    (options: Parameters<BaseGlobalHook>[0], code: GlobalHookCode<F>): void
+    (code: GlobalHookCode<F>): void
+}
+
 export function createKeywords<F extends object>(
+    baseBeforeAll: BaseGlobalHook,
+    baseAfterAll: BaseGlobalHook,
     baseBefore: BaseHook,
     baseAfter: BaseHook,
     defineStep: BaseStep,
-    fixtureDefinitions: ConstructorParameters<typeof PseudoFixture<F>>[0]
+    fixtureDefinitions: Definitions<F, object>
 ): {
+    BeforeAll: GlobalHook<F>
+    AfterAll: GlobalHook<F>
+    Before: Hook<F>
+    After: Hook<F>
     Given: Step<F>
     When: Step<F>
     Then: Step<F>
-    Before: Hook<F>
-    After: Hook<F>
 } {
     const pseudoFixture = new PseudoFixture<F>(fixtureDefinitions)
     baseAfter(() => pseudoFixture.runTeardown())
+    baseAfterAll(() => pseudoFixture.runGlobalTeardown())
 
     function createCallback<B extends unknown[]>(code: Code<F, B>) {
         const callback = (...args: unknown[]) => {
@@ -62,15 +76,20 @@ export function createKeywords<F extends object>(
             optionsOrCode: Parameters<BaseHook>[0] | HookCode<F>,
             code?: HookCode<F>
         ) {
-            function isHookCode(
-                data: Parameters<BaseHook>[0] | HookCode<F>
-            ): data is HookCode<F> {
-                return typeof data === 'function'
-            }
-
-            if (isHookCode(optionsOrCode))
+            if (typeof optionsOrCode === 'function')
                 baseHook(createCallback(optionsOrCode))
             else baseHook(optionsOrCode, createCallback(code!))
+        }
+    }
+
+    function createGlobalHook(baseGlobalHook: BaseGlobalHook) {
+        return function (
+            optionsOrCode: Parameters<BaseGlobalHook>[0] | GlobalHookCode<F>,
+            code?: GlobalHookCode<F>
+        ) {
+            if (typeof optionsOrCode === 'function')
+                baseGlobalHook(createCallback(optionsOrCode))
+            else baseGlobalHook(optionsOrCode, createCallback(code!))
         }
     }
 
@@ -79,18 +98,14 @@ export function createKeywords<F extends object>(
         optionsOrCode: Parameters<BaseStep>[1] | Code<F, A>,
         code?: Code<F, A>
     ) {
-        function isCode(
-            data: Parameters<BaseStep>[1] | Code<F, A>
-        ): data is Code<F, A> {
-            return typeof data === 'function'
-        }
-
-        if (isCode(optionsOrCode))
+        if (typeof optionsOrCode === 'function')
             defineStep(pattern, createCallback(optionsOrCode))
         else defineStep(pattern, optionsOrCode, createCallback(code!))
     }
 
     return {
+        BeforeAll: createGlobalHook(baseBeforeAll),
+        AfterAll: createGlobalHook(baseAfterAll),
         Before: createHook(baseBefore),
         After: createHook(baseAfter),
         Given: fixDefineStep,

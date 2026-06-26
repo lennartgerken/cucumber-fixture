@@ -1,24 +1,37 @@
 import { createKeywords } from '../../../dist'
 import { writeLog } from '../../log'
 import {
+    BeforeAll as baseBeforeAll,
+    AfterAll as baseAfterAll,
     Before as baseBefore,
     After as baseAfter,
     defineStep
 } from '@cucumber/cucumber'
 
-const { Given, When, Then, Before, After } = createKeywords<{
-    data1: void
-    data2: void
-}>(baseBefore, baseAfter, defineStep, {
-    data1: {
-        setup: ({ data2: _ }) => writeLog('setup:data1'),
-        teardown: () => writeLog('teardown:data1')
-    },
-    data2: {
-        setup: () => writeLog('setup:data2'),
-        teardown: () => writeLog(`teardown:data2`)
-    }
-})
+const { BeforeAll, AfterAll, Before, After, Given, When, Then } =
+    createKeywords<{
+        data1: void
+        data2: void
+        data3: void
+    }>(baseBeforeAll, baseAfterAll, baseBefore, baseAfter, defineStep, {
+        data1: {
+            setup: ({ data2: _ }) => writeLog('setup:data1'),
+            teardown: () => writeLog('teardown:data1')
+        },
+        data2: {
+            setup: ({ data3: _ }) => writeLog('setup:data2'),
+            teardown: () => writeLog(`teardown:data2`)
+        },
+        data3: {
+            setup: () => writeLog('setup:data3'),
+            teardown: () => writeLog(`teardown:data3`),
+            global: true
+        }
+    })
+
+BeforeAll(({ data3: _ }) => writeLog('before all'))
+
+AfterAll(() => writeLog('after all'))
 
 Before(() => writeLog('before'))
 

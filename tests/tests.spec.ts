@@ -2,8 +2,11 @@ import { execSync } from 'child_process'
 import { mkdirSync, readFileSync, rmSync } from 'fs'
 import { afterAll, beforeAll, expect, test } from 'vitest'
 import { join } from 'path'
+import { globSync } from 'fs'
 
 const runCucumber = async (path: string) => {
+    const features = globSync(path)
+    if (features.length === 0) throw new Error('No feature files found')
     execSync(`npx cucumber-js ${path} --import ${path}/steps.ts`)
 }
 
@@ -24,6 +27,8 @@ test.describe('log based', () => {
         expect(
             await runCucumberWithLog('./tests/features/lifecycle-order')
         ).toEqual([
+            'setup:data3',
+            'before all',
             'before',
             'setup:data2',
             'setup:data1',
@@ -33,7 +38,19 @@ test.describe('log based', () => {
             'then',
             'after',
             'teardown:data1',
-            'teardown:data2'
+            'teardown:data2',
+            'before',
+            'setup:data2',
+            'setup:data1',
+            'given start',
+            'given end',
+            'when',
+            'then',
+            'after',
+            'teardown:data1',
+            'teardown:data2',
+            'after all',
+            'teardown:data3'
         ])
     })
 
@@ -41,6 +58,9 @@ test.describe('log based', () => {
 })
 
 test('async fixture', () => runCucumber('./tests/features/async-fixture'))
+
+test('keep global fixture', () =>
+    runCucumber('./tests/features/global-fixture'))
 
 test('pass fixture through lifecycle', () =>
     runCucumber('./tests/features/lifecycle-fixture'))
