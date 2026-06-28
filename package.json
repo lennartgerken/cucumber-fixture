@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "license": "MIT",
     "author": "Lennart Gerken",
-    "description": "cucumber-fixture is a fixture structure for cucumber step definitions.",
+    "description": "cucumber-fixture provides a fixture structure for Cucumber step definitions.",
     "keywords": [
         "cucumber",
         "bdd",
@@ -11,6 +11,13 @@
         "testautomation",
         "fixtures"
     ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/lennartgerken/cucumber-fixture.git"
+    },
+    "bugs": {
+        "url": "https://github.com/lennartgerken/cucumber-fixture/issues"
+    },
     "type": "module",
     "types": "./dist/index.d.ts",
     "exports": {
